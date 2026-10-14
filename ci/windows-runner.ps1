@@ -143,4 +143,30 @@ if ($runtime -in @('auto', 'docker')) {
         }
     }
 }
+# Report the runtime probes on failure so setup problems are actionable.
+Write-Host '--- Windows Linux-runtime diagnostics ---'
+try {
+    $os = Get-CimInstance Win32_OperatingSystem
+    Write-Host ("Windows: {0}; version {1}; build {2}" -f $os.Caption, $os.Version, $os.BuildNumber)
+    Write-Host ("Runner account: {0}" -f [Security.Principal.WindowsIdentity]::GetCurrent().Name)
+} catch {
+    Write-Host ("Windows information unavailable: {0}" -f $_.Exception.Message)
+}
+$ErrorActionPreference = 'Continue'
+$diagnosticWsl = Get-Command wsl.exe -ErrorAction SilentlyContinue
+if ($null -eq $diagnosticWsl) {
+    Write-Host 'wsl.exe is not installed or not on the runner PATH.'
+} else {
+    Write-Host ("WSL command: {0}" -f $diagnosticWsl.Source)
+    & $diagnosticWsl.Source --status
+    & $diagnosticWsl.Source --list --verbose
+}
+$diagnosticDocker = Get-Command docker.exe -ErrorAction SilentlyContinue
+if ($null -eq $diagnosticDocker) {
+    Write-Host 'docker.exe is not installed or not on the runner PATH.'
+} else {
+    Write-Host ("Docker command: {0}" -f $diagnosticDocker.Source)
+    & $diagnosticDocker.Source info --format '{{.OSType}}'
+}
+$ErrorActionPreference = 'Stop'
 throw 'This Windows runner needs Ubuntu 22.04/24.04 in WSL, or a running Docker Desktop Linux engine accessible to its service account. See ci/README.md.'
