@@ -26,7 +26,8 @@ features, restart Windows, or install Docker Desktop.
 
 Provide at least 10 GiB free in the Linux filesystem for the kernel job. Image
 assembly needs additional space for both input images, a writable output image,
-compression and copies to Windows. Four compiler workers are used by default.
+compression and copies to Windows. Sixteen compiler workers are used by default for the 16-core, 32 GB runner.
+Ensure that WSL or Docker can access the required CPU, memory and free space.
 
 Optional repository **Actions variables**:
 

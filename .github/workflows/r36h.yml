@@ -55,7 +55,7 @@ env:
   SUPPORT_SHA256: 3a68bd41578e3f08278cf35a5bc1f74002f0c29ac760a25c15b11bc2999a229d
   R36H_RUNTIME: ${{ vars.R36H_RUNTIME || 'auto' }}
   R36H_WSL_DISTRO: ${{ vars.R36H_WSL_DISTRO }}
-  BUILD_JOBS: ${{ vars.R36H_BUILD_JOBS || '4' }}
+  BUILD_JOBS: ${{ vars.R36H_BUILD_JOBS || '16' }}
 
 jobs:
   checks:

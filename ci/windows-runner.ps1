@@ -53,7 +53,7 @@ if (-not (Test-Path -LiteralPath $supportFile -PathType Leaf)) {
 if ((Get-FileHash -LiteralPath $supportFile -Algorithm SHA256).Hash -ne $env:SUPPORT_SHA256) {
     throw 'Build-support checksum mismatch.'
 }
-$jobs = 4
+$jobs = 16
 if (-not [string]::IsNullOrWhiteSpace($env:BUILD_JOBS)) {
     if ($env:BUILD_JOBS -notmatch '^\d{1,2}$') { throw 'BUILD_JOBS must be an integer from 1 to 64.' }
     $jobs = [int]$env:BUILD_JOBS
