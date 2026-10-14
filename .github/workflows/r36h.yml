@@ -5,6 +5,7 @@ on:
     branches: [develop, gammaos-core-r36h, r36h-build-ci]
     paths:
       - '.github/workflows/*.yml'
+      - 'ci/**'
       - 'port/r36h/**'
       - 'device/gameconsole/r36h/**'
       - 'vendor/rockchip/common/bin/arm64/Android.bp'
@@ -48,16 +49,38 @@ concurrency:
 
 defaults:
   run:
-    shell: bash
+    shell: powershell
+
+env:
+  SUPPORT_SHA256: 3a68bd41578e3f08278cf35a5bc1f74002f0c29ac760a25c15b11bc2999a229d
+  R36H_RUNTIME: ${{ vars.R36H_RUNTIME || 'auto' }}
+  R36H_WSL_DISTRO: ${{ vars.R36H_WSL_DISTRO }}
+  BUILD_JOBS: ${{ vars.R36H_BUILD_JOBS || '4' }}
 
 jobs:
   checks:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 30
     steps:
-      - name: Extract checksum-pinned build support
+      - name: Prepare this job's temporary path
+        run: |
+          $stage = Join-Path $env:RUNNER_TEMP "r36h-$($env:GITHUB_RUN_ID)-$($env:GITHUB_RUN_ATTEMPT)-checks"
+          "R36H_STAGE=$stage" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Checkout Windows build bridge
+        uses: actions/checkout@v4
+        with:
+          path: _ci
+          sparse-checkout: ci
+          fetch-depth: 1
+          lfs: false
+          persist-credentials: false
+      - name: Check scripts and exercise the image packager in Linux
         env:
-          SUPPORT_SHA256: 3a68bd41578e3f08278cf35a5bc1f74002f0c29ac760a25c15b11bc2999a229d
+          MODE: ${{ inputs.mode || 'kernel' }}
+          BASE_URL: ${{ inputs.base_url }}
+          BASE_SHA: ${{ inputs.base_sha256 }}
+          SYSTEM_URL: ${{ inputs.system_url }}
+          SYSTEM_SHA: ${{ inputs.system_sha256 }}
           SUPPORT_ZIP: >-
             UEsDBBQAAAAIAGyCTl1bwJCbWgAAAGsAAAAiAAAAZGV2aWNlL2dhbWVjb25zb2xlL3IzNmgvQW5kcm9pZC5icNPXVwgOcInQ9clMTs0rTtX1TEnNK8lMy0wtslJwLEhM
             zkjVNdIz4CrOiE/KzEssqlSo5lIAgrzE3FQrBaUiY7MM3bzUkpTMxHQlHbBMcVEymoRecQZQrpYLAFBLAwQUAAAACABsgk5dM25IA3kAAACDAAAAKgAAAGRldmljZS9n
@@ -265,140 +288,117 @@ jobs:
             cG9ydC9yMzZoL3Rlc3RzL3Rlc3RfcG9ydC5weVBLAQIUAxQAAAAIAGyCTl0QVTRN+QAAAGcBAAArAAAAAAAAAAAAAACAAWhGAAB2ZW5kb3Ivcm9ja2NoaXAvY29tbW9u
             L2Jpbi9hcm02NC9BbmRyb2lkLmJwUEsFBgAAAAAQABAA6wQAAKpHAAAAAA==
         run: |
-          python3 - <<'PYCODE'
-          import os,base64,hashlib,io,zipfile
-          from pathlib import Path,PurePosixPath
-          data=base64.b64decode(os.environ['SUPPORT_ZIP'])
-          assert hashlib.sha256(data).hexdigest()==os.environ['SUPPORT_SHA256'], 'Support checksum mismatch'
-          archive=zipfile.ZipFile(io.BytesIO(data))
-          for item in archive.infolist():
-              path=PurePosixPath(item.filename)
-              assert not path.is_absolute() and '..' not in path.parts, 'Invalid support path'
-          archive.extractall('.')
-          Path('r36h-build-support.zip').write_bytes(data)
-          PYCODE
-      - name: Install check tools
-        run: |
-          bash port/r36h/install_tools.sh checks
-      - name: Check scripts and exercise the image packager
-        run: |
-          shellcheck -s bash port/r36h/*.sh
-          shellcheck -s sh device/gameconsole/r36h/r36h-netdiag.sh
-          python3 -m unittest discover -s port/r36h/tests -v
-      - name: Validate image inputs
-        if: github.event_name == 'workflow_dispatch'
-        env:
-          MODE: ${{ inputs.mode }}
-          BASE_URL: ${{ inputs.base_url }}
-          BASE_SHA: ${{ inputs.base_sha256 }}
-          SYSTEM_URL: ${{ inputs.system_url }}
-          SYSTEM_SHA: ${{ inputs.system_sha256 }}
-        run: |
-          python3 - <<'PY'
-          import os, re
-          mode = os.environ["MODE"]
-          pairs = []
-          if mode == "assemble":
-              pairs = [("BASE_URL", "BASE_SHA"), ("SYSTEM_URL", "SYSTEM_SHA")]
-          for url, checksum in pairs:
-              assert os.environ[url].startswith("https://"), f"{url} needs a public HTTPS URL"
-              assert re.fullmatch(r"[0-9a-fA-F]{64}", os.environ[checksum]), f"{checksum} needs the download SHA-256"
-          PY
-
+          & "$env:GITHUB_WORKSPACE/_ci/ci/windows-runner.ps1" -Task checks
       - name: Share verified build support
         uses: actions/upload-artifact@v4
         with:
           name: r36h-build-support-${{ github.run_id }}
-          path: r36h-build-support.zip
+          path: ${{ env.R36H_STAGE }}/output/checks/r36h-build-support.zip
           if-no-files-found: error
           retention-days: 14
+      - name: Upload check log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r36h-check-log-${{ github.run_id }}
+          path: ${{ env.R36H_STAGE }}/output/checks/build.log
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Remove this job's Windows staging files
+        if: always()
+        run: |
+          if (Test-Path -LiteralPath $env:R36H_STAGE) {
+            Remove-Item -LiteralPath $env:R36H_STAGE -Recurse -Force
+          }
 
   kernel:
     needs: checks
     if: github.event_name != 'pull_request'
-    runs-on: ubuntu-24.04
+    runs-on: [self-hosted, Windows, X64]
     timeout-minutes: 120
     steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: r36h-build-support-${{ github.run_id }}
-      - name: Extract build scripts
-        run: python3 -m zipfile -e r36h-build-support.zip .
-      - name: Checkout the pinned RK3326 kernel
+      - name: Prepare this job's temporary path
+        run: |
+          $stage = Join-Path $env:RUNNER_TEMP "r36h-$($env:GITHUB_RUN_ID)-$($env:GITHUB_RUN_ATTEMPT)-kernel"
+          "R36H_STAGE=$stage" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Checkout Windows build bridge
         uses: actions/checkout@v4
         with:
-          repository: andr36oid/android_kernel_gameconsole_r36s
-          ref: 25012887350da79f28cb6c73d04814abcc58578f
-          path: _kernel
+          path: _ci
+          sparse-checkout: ci
           fetch-depth: 1
           lfs: false
           persist-credentials: false
-      - name: Install GCC 12 and kernel build tools
+      - uses: actions/download-artifact@v4
+        with:
+          name: r36h-build-support-${{ github.run_id }}
+          path: ${{ env.R36H_STAGE }}/input
+      - name: Compile pinned wired-only kernel and panel references in Linux
         run: |
-          bash port/r36h/install_tools.sh kernel
-      - name: Compile wired-only kernel and panel references
-        env:
-          BUILD_JOBS: '4'
-        run: |
-          mkdir -p artifacts/kernel
-          bash port/r36h/build_kernel.sh _kernel "$RUNNER_TEMP/r36h-kernel" artifacts/kernel \
-            2>&1 | tee artifacts/kernel/build.log
+          & "$env:GITHUB_WORKSPACE/_ci/ci/windows-runner.ps1" -Task kernel
       - name: Upload kernel and configuration audit
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: r36h-kernel-${{ github.run_id }}
-          path: artifacts/kernel/
+          path: ${{ env.R36H_STAGE }}/output/kernel/
           include-hidden-files: false
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 14
+      - name: Remove this job's Windows staging files
+        if: always()
+        run: |
+          if (Test-Path -LiteralPath $env:R36H_STAGE) {
+            Remove-Item -LiteralPath $env:R36H_STAGE -Recurse -Force
+          }
 
   image:
     needs: [checks, kernel]
     if: github.event_name == 'workflow_dispatch' && inputs.mode == 'assemble' && needs.kernel.result == 'success'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 90
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 120
     steps:
+      - name: Prepare this job's temporary path
+        run: |
+          $stage = Join-Path $env:RUNNER_TEMP "r36h-$($env:GITHUB_RUN_ID)-$($env:GITHUB_RUN_ATTEMPT)-image"
+          "R36H_STAGE=$stage" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Checkout Windows build bridge
+        uses: actions/checkout@v4
+        with:
+          path: _ci
+          sparse-checkout: ci
+          fetch-depth: 1
+          lfs: false
+          persist-credentials: false
       - uses: actions/download-artifact@v4
         with:
           name: r36h-build-support-${{ github.run_id }}
-      - name: Extract build scripts
-        run: python3 -m zipfile -e r36h-build-support.zip .
+          path: ${{ env.R36H_STAGE }}/input
       - uses: actions/download-artifact@v4
         with:
           name: r36h-kernel-${{ github.run_id }}
-          path: artifacts/kernel
-      - name: Install image tools
-        run: |
-          bash port/r36h/install_tools.sh image
-      - name: Download checksum-pinned input images
+          path: ${{ env.R36H_STAGE }}/input/kernel
+      - name: Assemble experimental SD image in Linux
         env:
           MODE: ${{ inputs.mode }}
           BASE_URL: ${{ inputs.base_url }}
           BASE_SHA: ${{ inputs.base_sha256 }}
           SYSTEM_URL: ${{ inputs.system_url }}
           SYSTEM_SHA: ${{ inputs.system_sha256 }}
-        run: |
-          mkdir -p images artifacts/image
-          python3 port/r36h/prepare_input.py --url "$BASE_URL" \
-            --sha256 "$BASE_SHA" --output images/base.img
-          python3 port/r36h/prepare_input.py --url "$SYSTEM_URL" \
-            --sha256 "$SYSTEM_SHA" --output images/system.img
-      - name: Assemble experimental SD image with preserved board boot files
-        env:
           PANEL: ${{ inputs.panel }}
         run: |
-          python3 port/r36h/package_image.py \
-            --base images/base.img --system images/system.img \
-            --kernel artifacts/kernel --panel "$PANEL" \
-            --output artifacts/image/GammaOS-Core-R36H-EXPERIMENTAL.img
-          xz -T4 -1 artifacts/image/GammaOS-Core-R36H-EXPERIMENTAL.img
-          cp port/r36h/README.md artifacts/image/README.md
-          cd artifacts/image
-          sha256sum ./* > SHA256SUMS
-      - uses: actions/upload-artifact@v4
+          & "$env:GITHUB_WORKSPACE/_ci/ci/windows-runner.ps1" -Task image
+      - name: Upload experimental image and log
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
           name: r36h-sd-image-EXPERIMENTAL-${{ github.run_id }}
-          path: artifacts/image/
-          if-no-files-found: error
+          path: ${{ env.R36H_STAGE }}/output/image/
+          if-no-files-found: warn
           retention-days: 14
+      - name: Remove this job's Windows staging files
+        if: always()
+        run: |
+          if (Test-Path -LiteralPath $env:R36H_STAGE) {
+            Remove-Item -LiteralPath $env:R36H_STAGE -Recurse -Force
+          }
