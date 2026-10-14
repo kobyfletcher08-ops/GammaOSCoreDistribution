@@ -1,7 +1,0 @@
-{
-  "presubmit": [
-    {
-      "name": "python-symbol_test"
-    }
-  ]
-}

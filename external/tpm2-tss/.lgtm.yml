@@ -1,4 +1,0 @@
-extraction:
-  cpp:
-    prepare:
-      packages: "autoconf-archive"

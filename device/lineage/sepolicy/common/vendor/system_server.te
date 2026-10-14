@@ -1,2 +1,0 @@
-# Trust
-get_prop(system_server, vendor_security_patch_level_prop)

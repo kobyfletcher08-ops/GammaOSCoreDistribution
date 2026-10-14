@@ -1,6 +1,0 @@
-#define SUPPORTED_PERSONALITIES 2
-#define CAN_ARCH_BE_COMPAT_ON_64BIT_KERNEL 1
-
-#ifdef __tilepro__
-# define DEFAULT_PERSONALITY 1
-#endif

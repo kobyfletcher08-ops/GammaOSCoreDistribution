@@ -1,3 +1,0 @@
-type spi_virt_device, dev_type;
-
-allow tee spi_virt_device:chr_file { open read write };

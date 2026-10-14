@@ -1,4 +1,0 @@
-- Rework edit event layout
-- Drop support for Android 4.4
-- General bug fixes
-- New translations

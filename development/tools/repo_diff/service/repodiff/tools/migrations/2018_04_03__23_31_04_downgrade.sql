@@ -1,1 +1,0 @@
-DROP TABLE denormalized_view_top_tech_area;

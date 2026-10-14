@@ -1,9 +1,0 @@
-// Signature format: 2.0
-package android.adservices {
-
-  public class AdServicesVersion {
-    field public static final int API_VERSION;
-  }
-
-}
-

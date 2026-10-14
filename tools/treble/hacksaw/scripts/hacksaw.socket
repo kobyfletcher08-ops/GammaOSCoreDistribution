@@ -1,8 +1,0 @@
-[Socket]
-ListenStream=/var/run/hacksaw.sock
-SocketMode=0660
-SocketUser=root
-SocketGroup=hacksaw
-
-[Install]
-WantedBy=sockets.target

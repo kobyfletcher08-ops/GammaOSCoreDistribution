@@ -1,2 +1,0 @@
-- Fehler in der Benachrichtigungsfunktion behoben.
-- Neue Übersetzungen.

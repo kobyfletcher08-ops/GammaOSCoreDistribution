@@ -1,7 +1,0 @@
-{
-  "presubmit-large": [
-    {
-      "name": "vm-tests-tf"
-    }
-  ]
-}

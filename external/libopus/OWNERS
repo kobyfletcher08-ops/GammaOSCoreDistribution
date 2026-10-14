@@ -1,4 +1,0 @@
-# owners for external/sonivox
-include platform/frameworks/av:/media/janitors/codec_OWNERS
-flim@google.com
-essick@google.com

@@ -1,5 +1,0 @@
-include platform/system/core:/janitors/OWNERS
-
-# Owners from upstream & dynamic-tools@
-vitalybuka@google.com
-mitchp@google.com

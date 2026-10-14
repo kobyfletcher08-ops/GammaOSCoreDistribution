@@ -1,7 +1,0 @@
-{
-  "presubmit": [
-    {
-      "name": "CtsLibcoreJsr166TestCases"
-    }
-  ]
-}

@@ -1,7 +1,0 @@
-{
-    "permittedPaths" : [
-        "/data",
-        "/system/framework",
-        "/apex/com.android.art/javalib"
-    ]
-}

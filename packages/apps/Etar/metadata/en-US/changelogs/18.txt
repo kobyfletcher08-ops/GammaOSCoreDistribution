@@ -1,3 +1,0 @@
-- Bugs in month view fixed.
-- Fixed dark theme on tablets.
-- New translations.

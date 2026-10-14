@@ -1,1 +1,0 @@
-rule com.android.modules.utils.build.** android.os.ext.util.@1

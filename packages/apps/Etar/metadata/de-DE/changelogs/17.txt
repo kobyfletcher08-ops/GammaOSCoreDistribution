@@ -1,4 +1,0 @@
-- Verbesserte Monatsansicht.
-- Berechtigung zum Lesen der Kontakte ist wieder optional.
-- Schönere Eingabefelder bei Terminerstellung.
-- Fehlerbehebungen.

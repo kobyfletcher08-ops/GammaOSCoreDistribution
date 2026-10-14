@@ -1,7 +1,0 @@
-{
-  "carsettings-presubmit": [
-    {
-      "name": "CarSettingsUnitTests"
-    }
-  ]
-}

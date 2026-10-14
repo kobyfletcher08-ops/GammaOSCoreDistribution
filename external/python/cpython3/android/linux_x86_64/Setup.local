@@ -1,3 +1,0 @@
-_posixshmem _multiprocessing/posixshmem.c
-_ssl _ssl.c
-_hashlib _hashopenssl.c

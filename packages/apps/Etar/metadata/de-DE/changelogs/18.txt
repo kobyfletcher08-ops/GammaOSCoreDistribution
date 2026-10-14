@@ -1,3 +1,0 @@
-- Bugfixes in der Monatsansicht.
-- Fehler im dunklen Theme auf Tablets behoben.
-- Neue Übersetzungen.

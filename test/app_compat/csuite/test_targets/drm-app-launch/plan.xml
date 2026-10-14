@@ -1,3 +1,0 @@
-<configuration description="DRM Test Plan">
-  <object type="MODULE_INFO_PROVIDER" class="com.android.csuite.core.DirectoryBasedModuleInfoProvider" />
-</configuration>

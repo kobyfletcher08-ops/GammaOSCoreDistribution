@@ -1,4 +1,0 @@
-zap androidx.annotation.**
-zap javax.annotation.**
-zap kotlin.annotations.**
-zap org.checkerframework.**

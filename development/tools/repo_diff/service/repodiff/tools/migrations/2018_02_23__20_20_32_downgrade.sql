@@ -1,1 +1,0 @@
-DROP TABLE denormalized_view_changes_over_time;

@@ -1,1 +1,0 @@
-../../libs/ui/include/ui/StaticDisplayInfo.h

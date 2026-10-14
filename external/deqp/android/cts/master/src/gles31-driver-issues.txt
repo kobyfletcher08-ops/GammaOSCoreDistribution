@@ -1,2 +1,0 @@
-# b/130880466
-dEQP-GLES31.functional.separate_shader.random.38

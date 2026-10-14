@@ -1,2 +1,0 @@
-# Replace all errorprone packages with nullaway packages
-rule org.checkerframework.errorprone.** org.checkerframework.nullaway.@1

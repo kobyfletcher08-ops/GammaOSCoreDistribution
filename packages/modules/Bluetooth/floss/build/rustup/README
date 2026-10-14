@@ -1,2 +1,0 @@
-This is a locally downloaded copy of the Rustup script using:
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs

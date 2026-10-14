@@ -1,6 +1,0 @@
-a.so
-b.so
-c.so
-d.so
-e.so
-f.so

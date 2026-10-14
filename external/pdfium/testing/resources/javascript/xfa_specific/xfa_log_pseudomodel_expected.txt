@@ -1,2 +1,0 @@
-Alert: Is trace enabled - undefined
-Alert: finished testing methods

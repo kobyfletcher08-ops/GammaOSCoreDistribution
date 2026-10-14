@@ -1,3 +1,0 @@
-# Bug component: 1111194
-
-include platform/frameworks/base:/core/java/android/security/attestationverification/OWNERS

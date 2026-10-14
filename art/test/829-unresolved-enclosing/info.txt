@@ -1,2 +1,0 @@
-Regression test for Class.enclosingClass when the enclosing class is absent at
-runtime.

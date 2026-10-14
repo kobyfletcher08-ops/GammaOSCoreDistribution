@@ -1,3 +1,0 @@
-$dokka.format:java-layout-html
-$dokka.mode:kotlin
-foo

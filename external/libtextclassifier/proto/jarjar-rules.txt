@@ -1,2 +1,0 @@
-# Use our statically linked protobuf library
-rule com.google.protobuf.** com.android.textclassifier.protobuf.@1

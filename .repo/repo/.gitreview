@@ -1,5 +1,0 @@
-[gerrit]
-host=gerrit-review.googlesource.com
-scheme=https
-project=git-repo.git
-defaultbranch=main

@@ -1,3 +1,0 @@
-mov (1) g0<1>UD 4294967295UD { align1 };
-mov (1) g0<1>UD 2147483647D { align1 };
-mov (1) g0<1>UD -2147483648D { align1 };

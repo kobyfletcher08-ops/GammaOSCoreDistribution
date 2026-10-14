@@ -1,4 +1,0 @@
-Alert: Applying app method to xfa.host
-Alert: Caught: TypeError: CreateListFromArrayLike called on non-object
-Alert: Applying xfa.host method to app
-Alert: Caught: XFAObject.setFocus: no Holder() present.

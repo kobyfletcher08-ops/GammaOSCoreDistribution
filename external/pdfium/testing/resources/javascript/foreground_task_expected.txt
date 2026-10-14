@@ -1,2 +1,0 @@
-Alert: Posted
-Alert: Resolved

@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<lint>
-      <!-- SetupCompat lib prefixes styleable resources -->
-      <issue id="CustomViewStyleable" severity="ignore" />
-</lint>

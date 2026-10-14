@@ -1,7 +1,0 @@
-{
-  "carsysui-presubmit": [
-    {
-      "name": "CarNotificationUnitTests"
-    }
-  ]
-}

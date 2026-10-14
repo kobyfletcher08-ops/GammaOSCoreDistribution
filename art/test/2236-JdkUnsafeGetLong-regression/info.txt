@@ -1,2 +1,0 @@
-Regression test for jdk.internal.misc.Unsafe.getLong's intrinsic's locations
-not handled properly. Copied from 555-UnsafeGetLong-regression.

@@ -1,1 +1,0 @@
-atv_generic_system.mk

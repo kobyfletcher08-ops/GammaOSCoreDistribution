@@ -1,4 +1,0 @@
-URL: http://llvm.org/git/llvm.git
-Version: r275480 + cherry-picks
-BugComponent: 117395
-Owners: srhines, android-llvm

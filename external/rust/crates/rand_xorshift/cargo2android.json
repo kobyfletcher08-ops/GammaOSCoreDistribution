@@ -1,9 +1,0 @@
-{
-  "dependencies": true,
-  "dependency-blocklist": [
-    "bincode"
-  ],
-  "device": true,
-  "run": true,
-  "tests": true
-}

@@ -1,2 +1,0 @@
-# Allow dumpstate to make binder calls to hal_vehiclebus_default
-binder_call(dumpstate, hal_vehiclebus_default)

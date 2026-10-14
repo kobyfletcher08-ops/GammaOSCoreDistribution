@@ -1,2 +1,0 @@
-Test for linking interface methods and creating copied methods,
-namely miranda, default and default conflict methods.

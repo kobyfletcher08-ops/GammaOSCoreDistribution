@@ -1,4 +1,0 @@
-This script is used to update prebuilts from Google's internal build server. It is
-intended to be used when authenticated to Google's network.
-
-For information on running this script, please see go/update-prebuilts.

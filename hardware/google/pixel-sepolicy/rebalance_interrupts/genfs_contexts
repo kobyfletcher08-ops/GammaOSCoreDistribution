@@ -1,2 +1,0 @@
-genfscon sysfs /kernel/irq          u:object_r:sysfs_irq:s0
-genfscon proc /irq                  u:object_r:proc_irq:s0

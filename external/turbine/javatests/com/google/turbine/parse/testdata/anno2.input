@@ -1,3 +1,0 @@
-@Foo(bar = FooBar.Bar[].class)
-class Test {
-}

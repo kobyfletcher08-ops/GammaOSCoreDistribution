@@ -1,5 +1,0 @@
-- Extra Notifications required for internal alert sync. Please mute.
-- No longer required permissions removed.
-- Colored notification icon.
-- Bugfixes.
-- New translations.

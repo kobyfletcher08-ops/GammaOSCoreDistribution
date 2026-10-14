@@ -1,2 +1,0 @@
-# Prevent proguard from stripping out any service-uwb.
--keep class com.android.server.uwb.** { *; }

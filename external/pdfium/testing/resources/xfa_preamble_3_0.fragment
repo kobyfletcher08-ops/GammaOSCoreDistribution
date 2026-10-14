@@ -1,7 +1,0 @@
-{{object 3 0}} <<
-  {{streamlen}}
->>
-stream
-{{include xfa_preamble.xml}}
-endstream
-endobj

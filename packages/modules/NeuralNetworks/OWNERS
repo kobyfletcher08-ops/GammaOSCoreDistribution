@@ -1,3 +1,0 @@
-# Bug component: 195575
-include /NNAPI_OWNERS  # Neuralnetworks team
-include platform/packages/modules/common:/MODULES_OWNERS  # see go/mainline-owners-policy

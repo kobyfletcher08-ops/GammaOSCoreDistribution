@@ -1,8 +1,0 @@
-=== V.java ===
-@interface V {
-  Class<?> value() default void.class;
-}
-=== A.java ===
-@V()
-class A {
-}

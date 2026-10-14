@@ -1,9 +1,0 @@
-// Signature format: 2.0
-package android.ondevicepersonalization {
-
-  public class OnDevicePersonalizationFrameworkInitializer {
-    method public static void registerServiceWrappers();
-  }
-
-}
-

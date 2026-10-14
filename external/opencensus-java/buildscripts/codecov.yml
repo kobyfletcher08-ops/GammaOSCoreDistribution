@@ -1,2 +1,0 @@
-ignore:
-  - "impl_core/src/main/java/io/opencensus/implcore/internal/VarInt.java"  # ignore VarInt

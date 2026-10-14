@@ -1,1 +1,0 @@
-genfscon debugfs /tracing/events/fastrpc/fastrpc_dma_stat        u:object_r:debugfs_tracing:s0

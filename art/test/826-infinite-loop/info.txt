@@ -1,2 +1,0 @@
-Regression test for partial escape elimination, which used to crash when
-visiting an infinite loop.

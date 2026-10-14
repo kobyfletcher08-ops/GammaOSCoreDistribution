@@ -1,4 +1,0 @@
-# The only change here should be just mirroring upstream.
-# wvo@google.com # upstream maintainer
-# smiles@google.com # upstream maintainer
-include platform/system/core:/janitors/OWNERS

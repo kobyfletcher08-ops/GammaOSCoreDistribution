@@ -1,3 +1,0 @@
-Landroid/compilation/cts/appusedbyotherapp/MyActivity;
-HSPLandroid/compilation/cts/appusedbyotherapp/MyActivity;->method1()V
-HSPLandroid/compilation/cts/appusedbyotherapp/MyActivity;->method2()V

@@ -1,6 +1,0 @@
-#!/bin/sh
-# Check strace -k symbol names demangling.
-
-test_prog=../stack-fcall-mangled
-
-. "${srcdir=.}"/strace-k.test

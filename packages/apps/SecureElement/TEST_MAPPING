@@ -1,8 +1,0 @@
-{
-  "postsubmit": [
-    {
-      "name": "SecureElementInstrumentationTests",
-      "keywords": ["primary-device"]
-    }
-  ]
-}

@@ -1,2 +1,0 @@
-set noparent
-include toolchain/llvm_android:/OWNERS

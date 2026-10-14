@@ -1,9 +1,0 @@
-// Signature format: 2.0
-package android.scheduling {
-
-  public class SchedulingFrameworkInitializer {
-    method public static void registerServiceWrappers();
-  }
-
-}
-

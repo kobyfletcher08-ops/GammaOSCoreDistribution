@@ -1,3 +1,0 @@
-Aborted after: startup
-
-Kernel tainted (0x200)

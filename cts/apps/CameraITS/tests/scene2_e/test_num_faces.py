@@ -1,1 +1,0 @@
-../scene2_a/test_num_faces.py

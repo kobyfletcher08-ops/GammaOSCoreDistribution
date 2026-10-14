@@ -1,2 +1,0 @@
-second-subtest
-exit:0 (0.013s)

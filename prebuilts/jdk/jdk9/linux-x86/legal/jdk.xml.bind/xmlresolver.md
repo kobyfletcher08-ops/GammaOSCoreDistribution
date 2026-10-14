@@ -1,1 +1,0 @@
-../java.xml/xmlresolver.md

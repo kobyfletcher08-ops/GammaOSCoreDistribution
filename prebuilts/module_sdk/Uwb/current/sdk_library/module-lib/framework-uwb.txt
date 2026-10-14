@@ -1,9 +1,0 @@
-// Signature format: 2.0
-package android.uwb {
-
-  public class UwbFrameworkInitializer {
-    method public static void registerServiceWrappers();
-  }
-
-}
-

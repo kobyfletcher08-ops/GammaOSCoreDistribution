@@ -1,2 +1,0 @@
-# sysfs
-type sysfs_dpm_variant, sysfs_type, fs_type; # dpm variant
