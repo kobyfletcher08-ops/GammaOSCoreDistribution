@@ -1,0 +1,16 @@
+// SPDX-License-Identifier: Apache-2.0
+cc_library_shared {
+    name: "audio.primary.r36h",
+    srcs: ["audio/audio_hw.c"],
+    vendor: true,
+    relative_install_path: "hw",
+    shared_libs: ["liblog", "libcutils", "libtinyalsa"],
+    header_libs: ["libhardware_headers", "libaudio_system_headers"],
+    cflags: ["-Wall", "-Werror", "-Wno-unused-parameter"],
+}
+
+sh_binary {
+    name: "r36h-netdiag",
+    src: "r36h-netdiag.sh",
+    filename: "r36h-netdiag",
+}

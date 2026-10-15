@@ -18,13 +18,6 @@ free -h
 if [[ -d "$source_dir/.git" ]]; then
     echo 'Existing native source cache:'
     git -C "$source_dir" rev-parse --verify HEAD || true
-    git -C "$source_dir" lfs ls-files --long > "$stage/output/lfs-inventory.txt"
-    python3 - "$stage/output/lfs-inventory.txt" <<'PY'
-import pathlib, sys
-rows = pathlib.Path(sys.argv[1]).read_text().splitlines()
-print('LFS inventory:', len(rows), 'tracked objects;', sum(' - ' in line for line in rows), 'pointer files')
-for row in rows[:15]: print(row)
-PY
 fi
 available=$(df -PB1 "$cache" | awk 'NR==2 {print $4}')
 if ((available < 120 * 1024 * 1024 * 1024)); then
@@ -68,10 +61,7 @@ git -C "$source_dir" checkout --detach "$source_commit"
 # the many LFS-backed .repo packfiles tracked by this repository.
 git -C "$source_dir" lfs install --local --skip-smudge
 timeout --signal=TERM --kill-after=30s 60m \
-    git -C "$source_dir" -c lfs.concurrenttransfers=4 -c lfs.activitytimeout=90 \
-    -c lfs.transfer.maxretries=2 lfs pull \
-    --include='prebuilts/clang/host/linux-x86/clang-r450784d/**,prebuilts/clang/host/linux-x86/clang-stable/**,prebuilts/clang-tools/linux-x86/**,prebuilts/jdk/jdk11/linux-x86/**,prebuilts/rust/linux-x86/**,prebuilts/go/linux-x86/**,prebuilts/build-tools/linux-x86/**,prebuilts/sdk/**,prebuilts/vndk/**,prebuilts/module_sdk/**,prebuilts/runtime/**,device/google/atv/gammaos/**,external/kotlinc/**,external/chromium-webview/prebuilt/arm/**,external/chromium-webview/prebuilt/arm64/**,packages/modules/GeoTZ/**,vendor/rockchip/common/bin/arm64/busybox' \
-    --exclude='.repo/**,out/**,**/darwin*/**,**/windows*/**'
+    python3 -u "$stage/hydrate_lfs.py" "$source_dir" "$stage/output/lfs-report.json"
 git -C "$source_dir" rev-parse HEAD > "$stage/output/gammaos-source-commit.txt"
 du -sh "$source_dir" "$source_dir/.git"
 df -h "$cache"

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<compatibility-matrix version="1.0" type="framework">
+    <hal format="aidl" optional="true">
+        <name>android.hardware.graphics.allocator</name>
+        <version>1</version>
+        <interface><name>IAllocator</name><instance>default</instance></interface>
+    </hal>
+</compatibility-matrix>

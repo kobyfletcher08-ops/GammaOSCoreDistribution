@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: Apache-2.0
+# No borrowed vendor partition, dm-verity, dynamic super partition or A/B slots.
+/dev/block/by-name/system   /system  ext4  ro,barrier=1                 wait,first_stage_mount
+/dev/block/by-name/vendor   /vendor  ext4  ro,barrier=1                 wait,first_stage_mount
+/dev/block/by-name/userdata /data    ext4  noatime,nosuid,nodev,discard wait,check,formattable,latemount,quota
+/devices/platform/ff380000.mmc/mmc_host* auto auto defaults voldmanaged=sdcard1:auto
+/devices/platform/ff380000.dwmmc/mmc_host* auto auto defaults voldmanaged=sdcard1:auto
+/devices/platform/*usb* auto auto defaults voldmanaged=usb:auto

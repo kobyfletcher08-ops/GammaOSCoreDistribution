@@ -1,0 +1,11 @@
+// SPDX-License-Identifier: Apache-2.0
+// Existing ARM64 Android BusyBox prebuilt from the upstream Rockchip tree.
+// See port/r36h/README.md for licensing and source provenance.
+cc_prebuilt_binary {
+    name: "r36h_busybox",
+    srcs: ["busybox"],
+    filename: "busybox",
+    compile_multilib: "64",
+    strip: { none: true },
+    check_elf_files: false,
+}

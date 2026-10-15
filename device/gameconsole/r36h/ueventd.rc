@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: Apache-2.0
+/dev/mali0          0660 system graphics
+/dev/dri/card*      0660 system graphics
+/dev/dri/renderD*   0660 system graphics
+/dev/dma_heap/*     0660 system graphics
+/dev/snd/*          0660 system audio
+/dev/ppp           0660 system radio
+/dev/ttyUSB*       0660 system radio
+/dev/ttyACM*       0660 system radio
+/sys/class/backlight/backlight brightness 0660 system graphics

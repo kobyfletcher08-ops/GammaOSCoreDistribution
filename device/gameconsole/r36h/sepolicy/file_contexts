@@ -1,0 +1,2 @@
+# Device-specific configuration; HAL labels come from the platform policy.
+/vendor/etc/fstab\.r36h u:object_r:vendor_configs_file:s0

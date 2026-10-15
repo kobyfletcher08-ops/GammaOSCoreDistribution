@@ -1,0 +1,23 @@
+# SPDX-License-Identifier: Apache-2.0
+on init
+    write /proc/sys/kernel/panic_on_oops 1
+    write /proc/sys/kernel/panic 10
+
+on fs
+    mount_all /vendor/etc/fstab.r36h --early
+
+on late-fs
+    mount_all /vendor/etc/fstab.r36h --late
+
+on post-fs-data
+    mkdir /data/vendor/r36h 0770 system system
+
+on boot
+    chown system graphics /sys/class/backlight/backlight/brightness
+    chmod 0660 /sys/class/backlight/backlight/brightness
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+
+# Android's Ethernet service handles host-side RNDIS/USB Ethernet DHCP, DNS and
+# policy routing. Do not overwrite phone routing or force the port into gadget
+# RNDIS mode: the phone is the tethering device and this handheld is the host.

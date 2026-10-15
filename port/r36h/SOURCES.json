@@ -1,0 +1,35 @@
+{
+  "gammaos": {
+    "repository": "kobyfletcher08-ops/GammaOSCoreDistribution",
+    "commit": "f1e56c11abc2dd6ec252bda8b320f025165fcbf0"
+  },
+  "kernel": {
+    "repository": "rockchip-linux/kernel",
+    "commit": "95a3ad83f7f90e0e672b9c99b0858b4964318667"
+  },
+  "u_boot": {
+    "repository": "u-boot/u-boot",
+    "commit": "f919c3a889f0ec7d63a48b5d0ed064386b0980bd",
+    "reference_defconfig": "odroid-go2_defconfig",
+    "hardware_boot_tested": false
+  },
+  "rkbin": {
+    "repository": "rockchip-linux/rkbin",
+    "commit": "3e288fe814e059dd06833495f845cab04ac20a5c",
+    "bl31": "bin/rk33/rk3326_bl31_v1.37.elf"
+  },
+  "board_profiles": {
+    "v20": {
+      "reference_model": "HL-R36H-V20 2024-05-18",
+      "url": "https://raw.githubusercontent.com/southoz/dArkOSRE-R36/3f372c85aa53a26b265c3dc0c2661ec0fae5faf0/files/BOOT/dtb/r36s/HL-R36H-V20%202024-05-18/rk3326-r36s-linux.dtb",
+      "sha256": "912145fb515b2f8e81a1996d7d20a4b766d6e1f34d2d810f517bbea72e59a4bb",
+      "hardware_boot_tested": false
+    },
+    "v21": {
+      "reference_model": "HL-R36H-V21 2024-11-18",
+      "url": "https://raw.githubusercontent.com/southoz/dArkOSRE-R36/3f372c85aa53a26b265c3dc0c2661ec0fae5faf0/files/BOOT/dtb/r36s/HL-R36H-V21%202024-11-18/rk3326-r36s-linux.dtb",
+      "sha256": "ba01dd4ad201b7200e28ce02c625a8d8f321f38ab80764fca0476a4cbcc23e47",
+      "hardware_boot_tested": false
+    }
+  }
+}
