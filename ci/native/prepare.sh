@@ -24,7 +24,7 @@ apt-get install -y --no-install-recommends git git-lfs ca-certificates curl pyth
     rsync zip unzip xz-utils file build-essential bc bison flex libssl-dev libelf-dev \
     zlib1g-dev libncurses-dev libxml2-utils xsltproc g++-multilib gcc-multilib \
     lib32z1-dev fontconfig lz4 lzop squashfs-tools cpio dosfstools mtools e2fsprogs \
-    gdisk device-tree-compiler u-boot-tools gcc-aarch64-linux-gnu
+    gdisk device-tree-compiler u-boot-tools
 git lfs version
 if [[ ! -d "$source_dir/.git" ]]; then
     mkdir -p "$source_dir"
