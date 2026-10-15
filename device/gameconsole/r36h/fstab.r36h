@@ -3,6 +3,7 @@
 /dev/block/by-name/system   /system  ext4  ro,barrier=1                 wait,first_stage_mount
 /dev/block/by-name/vendor   /vendor  ext4  ro,barrier=1                 wait,first_stage_mount
 /dev/block/by-name/userdata /data    ext4  noatime,nosuid,nodev,discard wait,check,formattable,latemount,quota
+/dev/block/zram0             none     swap  defaults                     zramsize=536870912,swapprio=32758
 /devices/platform/ff380000.mmc/mmc_host* auto auto defaults voldmanaged=sdcard1:auto
 /devices/platform/ff380000.dwmmc/mmc_host* auto auto defaults voldmanaged=sdcard1:auto
 /devices/platform/*usb* auto auto defaults voldmanaged=usb:auto

@@ -1,4 +1,4 @@
-name: R36H native GammaOS source preparation
+name: R36H native GammaOS image
 
 on:
   push:
@@ -6,19 +6,32 @@ on:
     paths:
       - '.github/workflows/r36h-native.yml'
       - 'ci/native/**'
+      - 'port/r36h/**'
+      - 'device/gameconsole/r36h/**'
+      - 'vendor/rockchip/common/bin/arm64/Android.bp'
   workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Build the full native SD image or prepare sources only'
+        type: choice
+        options: [full, source]
+        default: full
 
 permissions:
   contents: read
 
 concurrency:
-  group: r36h-native-source
+  group: r36h-native-image
   cancel-in-progress: false
 
+env:
+  BUILD_JOBS: ${{ vars.R36H_BUILD_JOBS || '16' }}
+  ANDROID_BUILD_JOBS: ${{ vars.R36H_ANDROID_BUILD_JOBS || '8' }}
+
 jobs:
-  prepare:
+  build:
     runs-on: [self-hosted, Windows, X64]
-    timeout-minutes: 180
+    timeout-minutes: 720
     defaults:
       run:
         shell: powershell
@@ -51,12 +64,54 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Ubuntu-24.04 is not accessible to the runner account.' }
           & wsl.exe -d Ubuntu-24.04 -u root --exec bash "$linuxStage/bootstrap.sh" $linuxStage $env:GITHUB_SHA
           if ($LASTEXITCODE -ne 0) { throw 'Native source preparation failed; see the diagnostic artifact.' }
-      - name: Upload source diagnostics
+      - name: Build the independent Rockchip kernel and native U-Boot
+        if: github.event.inputs.mode != 'source'
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $linuxStage = (& wsl.exe -d Ubuntu-24.04 -u root --exec wslpath -a -u $env:NATIVE_STAGE | Out-String).Trim()
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot map the staging directory.' }
+          $driver = "/var/cache/gammaos-r36h-native/ci/$($env:GITHUB_SHA)/ci/native/run_stage.sh"
+          & wsl.exe -d Ubuntu-24.04 -u root --exec env "BUILD_JOBS=$($env:BUILD_JOBS)" bash $driver $linuxStage kernel
+          if ($LASTEXITCODE -ne 0) { throw 'Native kernel/bootloader build failed; see kernel.log.' }
+      - name: Build GammaOS Android, vendor and first-stage ramdisk from source
+        if: github.event.inputs.mode != 'source'
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $linuxStage = (& wsl.exe -d Ubuntu-24.04 -u root --exec wslpath -a -u $env:NATIVE_STAGE | Out-String).Trim()
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot map the staging directory.' }
+          $driver = "/var/cache/gammaos-r36h-native/ci/$($env:GITHUB_SHA)/ci/native/run_stage.sh"
+          & wsl.exe -d Ubuntu-24.04 -u root --exec env "ANDROID_BUILD_JOBS=$($env:ANDROID_BUILD_JOBS)" bash $driver $linuxStage android
+          if ($LASTEXITCODE -ne 0) { throw 'Native Android build failed; see android.log.' }
+      - name: Assemble and verify the complete SD image
+        if: github.event.inputs.mode != 'source'
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $linuxStage = (& wsl.exe -d Ubuntu-24.04 -u root --exec wslpath -a -u $env:NATIVE_STAGE | Out-String).Trim()
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot map the staging directory.' }
+          $driver = "/var/cache/gammaos-r36h-native/ci/$($env:GITHUB_SHA)/ci/native/run_stage.sh"
+          & wsl.exe -d Ubuntu-24.04 -u root --exec bash $driver $linuxStage image
+          if ($LASTEXITCODE -ne 0) { throw 'Native image verification failed; see image.log.' }
+      - name: Upload the full native experimental image
+        if: success() && github.event.inputs.mode != 'source'
+        uses: actions/upload-artifact@v4
+        with:
+          name: GammaOS-Core-R36H-NATIVE-EXPERIMENTAL-${{ github.run_id }}
+          path: ${{ env.NATIVE_STAGE }}/output/image/
+          compression-level: 0
+          retention-days: 14
+          if-no-files-found: error
+      - name: Upload build diagnostics and native kernel outputs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: r36h-native-source-${{ github.run_id }}
-          path: ${{ env.NATIVE_STAGE }}/output/
+          name: r36h-native-diagnostics-${{ github.run_id }}
+          path: |
+            ${{ env.NATIVE_STAGE }}/output/*.log
+            ${{ env.NATIVE_STAGE }}/output/*.json
+            ${{ env.NATIVE_STAGE }}/output/*.txt
+            ${{ env.NATIVE_STAGE }}/output/kernel/
+            ${{ env.NATIVE_STAGE }}/output/bootloader/
+            ${{ env.NATIVE_STAGE }}/output/android/
           retention-days: 14
           if-no-files-found: warn
       - name: Remove this run's Windows staging files

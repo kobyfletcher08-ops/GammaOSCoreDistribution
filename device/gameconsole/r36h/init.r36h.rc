@@ -8,6 +8,7 @@ on fs
 
 on late-fs
     mount_all /vendor/etc/fstab.r36h --late
+    swapon_all /vendor/etc/fstab.r36h
 
 on post-fs-data
     mkdir /data/vendor/r36h 0770 system system

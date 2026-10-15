@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0
+set -euo pipefail
+support=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)
+cache=/var/cache/gammaos-r36h-native
+source_dir=$cache/android
+output=$(realpath -m -- "$1")
+mkdir -p "$output"
+[[ -s "$cache/artifacts/kernel/Image" ]]
+python3 "$support/ci/native/apply_source.py" "$source_dir" "$support"
+export OUT_DIR="$cache/out-native" R36H_NATIVE_KERNEL="$cache/artifacts/kernel/Image"
+export BUILD_USERNAME=gammaos BUILD_HOSTNAME=r36h-native-runner
+cd "$source_dir"
+python3 - <<'PY'
+from pathlib import Path
+import struct
+p=Path('vendor/rockchip/common/bin/arm64/busybox')
+with p.open('rb') as f: data=f.read(64)
+if data[:6] != b'\x7fELF\x02\x01' or struct.unpack_from('<H',data,18)[0]!=183:
+    raise SystemExit('Native build requires the real ARM64 BusyBox ELF')
+PY
+# Upstream envsetup legitimately references unset shell variables.
+set +u
+# shellcheck disable=SC1091
+source build/envsetup.sh
+lunch gamma_r36h-userdebug
+product_out=$(get_build_var PRODUCT_OUT)
+[[ "$product_out" == "$OUT_DIR/target/product/r36h" ]]
+# With 32 GiB RAM, cap Android's parallel jobs while retaining 16-way kernel
+# compilation. An explicit repository variable can lower it further.
+jobs=${ANDROID_BUILD_JOBS:-8}
+[[ "$jobs" =~ ^[1-9][0-9]?$ && "$jobs" -le 32 ]]
+m -j"$jobs" bootimage systemimage vendorimage userdataimage
+set -u
+for name in boot.img ramdisk.img system.img vendor.img userdata.img; do
+    [[ -s "$product_out/$name" ]]
+done
+printf '%s\n' "$product_out" > "$cache/android-product-out.txt"
+git rev-parse HEAD > "$output/android-source-commit.txt"
+printf '%s\n' 'gamma_r36h-userdebug' > "$output/android-target.txt"
+cp "$source_dir/device/gameconsole/r36h/BoardConfig.mk" "$output/"
+cp "$source_dir/device/gameconsole/r36h/manifest.xml" "$output/vendor-manifest-source.xml"
+df -h "$cache"
