@@ -1,0 +1,57 @@
+name: R36H native GammaOS source preparation
+
+on:
+  push:
+    branches: [r36h-build-ci]
+    paths:
+      - '.github/workflows/r36h-native.yml'
+      - 'ci/native/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: r36h-native-source
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 180
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: _native_ci
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Prepare independent GammaOS sources in Ubuntu
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $stage = Join-Path $env:RUNNER_TEMP "r36h-native-$($env:GITHUB_RUN_ID)-$($env:GITHUB_RUN_ATTEMPT)"
+          New-Item -ItemType Directory -Force -Path $stage | Out-Null
+          "NATIVE_STAGE=$stage" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          $utf8 = New-Object System.Text.UTF8Encoding($false)
+          $source = Join-Path $env:GITHUB_WORKSPACE '_native_ci/ci/native/prepare.sh'
+          [IO.File]::WriteAllText((Join-Path $stage 'prepare.sh'), [IO.File]::ReadAllText($source).Replace("`r`n", "`n"), $utf8)
+          $linuxStage = (& wsl.exe -d Ubuntu-24.04 -u root --exec wslpath -a -u $stage | Out-String).Trim()
+          if ($LASTEXITCODE -ne 0) { throw 'Ubuntu-24.04 is not accessible to the runner account.' }
+          & wsl.exe -d Ubuntu-24.04 -u root --exec bash "$linuxStage/prepare.sh" $linuxStage
+          if ($LASTEXITCODE -ne 0) { throw 'Native source preparation failed; see the diagnostic artifact.' }
+      - name: Upload source diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r36h-native-source-${{ github.run_id }}
+          path: ${{ env.NATIVE_STAGE }}/output/
+          retention-days: 14
+          if-no-files-found: warn
+      - name: Remove this run's Windows staging files
+        if: always()
+        run: |
+          if ($env:NATIVE_STAGE -and (Test-Path -LiteralPath $env:NATIVE_STAGE)) {
+            Remove-Item -LiteralPath $env:NATIVE_STAGE -Force -Recurse
+          }
