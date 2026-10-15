@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 set -euo pipefail
 stage=$(realpath -- "$1")
+scripts=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 mkdir -p "$stage/output"
 exec > >(tee "$stage/output/prepare.log") 2>&1
 export DEBIAN_FRONTEND=noninteractive GIT_TERMINAL_PROMPT=0 GIT_LFS_SKIP_SMUDGE=1
@@ -61,7 +62,7 @@ git -C "$source_dir" checkout --detach "$source_commit"
 # the many LFS-backed .repo packfiles tracked by this repository.
 git -C "$source_dir" lfs install --local --skip-smudge
 timeout --signal=TERM --kill-after=30s 60m \
-    python3 -u "$stage/hydrate_lfs.py" "$source_dir" "$stage/output/lfs-report.json"
+    python3 -u "$scripts/hydrate_lfs.py" "$source_dir" "$stage/output/lfs-report.json"
 git -C "$source_dir" rev-parse HEAD > "$stage/output/gammaos-source-commit.txt"
 du -sh "$source_dir" "$source_dir/.git"
 df -h "$cache"

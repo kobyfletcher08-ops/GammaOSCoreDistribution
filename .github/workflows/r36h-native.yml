@@ -23,11 +23,6 @@ jobs:
       run:
         shell: powershell
     steps:
-      - uses: actions/checkout@v4
-        with:
-          path: _native_ci
-          fetch-depth: 1
-          persist-credentials: false
       - name: Prepare independent GammaOS sources in Ubuntu
         run: |
           $ErrorActionPreference = 'Stop'
@@ -35,13 +30,26 @@ jobs:
           New-Item -ItemType Directory -Force -Path $stage | Out-Null
           "NATIVE_STAGE=$stage" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           $utf8 = New-Object System.Text.UTF8Encoding($false)
-          foreach ($file in @('prepare.sh', 'hydrate_lfs.py')) {
-            $source = Join-Path $env:GITHUB_WORKSPACE "_native_ci/ci/native/$file"
-            [IO.File]::WriteAllText((Join-Path $stage $file), [IO.File]::ReadAllText($source).Replace("`r`n", "`n"), $utf8)
-          }
+          $bootstrap = @'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          stage=$(realpath -- "$1")
+          revision=$2
+          [[ "$revision" =~ ^[0-9a-f]{40}$ ]]
+          ci=/var/cache/gammaos-r36h-native/ci/$revision
+          mkdir -p "$ci"
+          if [[ ! -d "$ci/.git" ]]; then
+              git -C "$ci" init
+              git -C "$ci" remote add origin https://github.com/kobyfletcher08-ops/GammaOSCoreDistribution.git
+              git -C "$ci" fetch --no-tags --depth=1 origin "$revision"
+              git -C "$ci" -c core.autocrlf=false checkout --detach "$revision"
+          fi
+          bash "$ci/ci/native/prepare.sh" "$stage"
+          '@
+          [IO.File]::WriteAllText((Join-Path $stage 'bootstrap.sh'), $bootstrap.Replace("`r`n", "`n"), $utf8)
           $linuxStage = (& wsl.exe -d Ubuntu-24.04 -u root --exec wslpath -a -u $stage | Out-String).Trim()
           if ($LASTEXITCODE -ne 0) { throw 'Ubuntu-24.04 is not accessible to the runner account.' }
-          & wsl.exe -d Ubuntu-24.04 -u root --exec bash "$linuxStage/prepare.sh" $linuxStage
+          & wsl.exe -d Ubuntu-24.04 -u root --exec bash "$linuxStage/bootstrap.sh" $linuxStage $env:GITHUB_SHA
           if ($LASTEXITCODE -ne 0) { throw 'Native source preparation failed; see the diagnostic artifact.' }
       - name: Upload source diagnostics
         if: always()
