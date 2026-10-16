@@ -38,6 +38,8 @@ python3 "$support/configure_kernel.py" --source "$kernel" --config "$objects/.co
 "${kmake[@]}" olddefconfig
 python3 "$support/configure_kernel.py" --source "$kernel" --config "$objects/.config" --fragment "$support/kernel.fragment" --audit > "$output/kernel-config-audit.json"
 "${kmake[@]}" -j"$jobs" Image rockchip/rk3326-r36h-v20.dtb rockchip/rk3326-r36h-v21.dtb
+"${kmake[@]}" headers_install INSTALL_HDR_PATH="$output/headers"
+[[ -s "$output/headers/include/linux/types.h" && -s "$output/headers/include/asm/unistd.h" ]]
 cp "$objects/arch/arm64/boot/Image" "$output/Image"
 cp "$objects/arch/arm64/boot/dts/rockchip/"rk3326-r36h-v{20,21}.dtb "$output/"
 cp "$objects/.config" "$output/kernel.config"

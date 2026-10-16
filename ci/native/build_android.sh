@@ -7,7 +7,8 @@ source_dir=$cache/android
 output=$(realpath -m -- "$1")
 mkdir -p "$output"
 [[ -s "$cache/artifacts/kernel/Image" ]]
-python3 "$support/ci/native/apply_source.py" "$source_dir" "$support"
+python3 "$support/ci/native/apply_source.py" "$source_dir" "$support" \
+    --kernel-headers "$cache/artifacts/kernel/headers"
 export OUT_DIR="$cache/out-native" R36H_NATIVE_KERNEL="$cache/artifacts/kernel/Image"
 export BUILD_USERNAME=gammaos BUILD_HOSTNAME=r36h-native-runner
 cd "$source_dir"

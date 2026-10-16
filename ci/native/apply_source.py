@@ -6,16 +6,39 @@ import argparse
 import shutil
 
 
-def apply(source, support):
+def apply(source, support, kernel_headers):
+    if not (kernel_headers/'include/linux/types.h').is_file() or not (kernel_headers/'include/asm/unistd.h').is_file():
+        raise ValueError('Missing exported native ARM64 kernel UAPI headers')
     target = source/'device/gameconsole/r36h'
     if target.exists():
         shutil.rmtree(target)
     shutil.copytree(support/'device/gameconsole/r36h', target)
+    shutil.copytree(kernel_headers, target/'kernel-headers')
     bp = source/'vendor/rockchip/common/bin/arm64/Android.bp'
     extra = (support/'vendor/rockchip/common/bin/arm64/Android.bp').read_text()
     # This file does not exist in the pinned GammaOS source. We own its
     # generated definition and must refresh it on cached source checkouts.
     bp.write_text(extra)
+    # Keep the existing Lineage header module interface, using the sanitized
+    # headers from our separate native kernel build. No Lineage kernel make
+    # variables or a second kernel source checkout are needed inside Soong.
+    lineage_bp = source/'vendor/lineage/build/soong/Android.bp'
+    text = lineage_bp.read_text()
+    anchor = 'lineage_generator {\n    name: "generated_kernel_includes",'
+    start = text.find(anchor)
+    end = text.find('\ncc_library_headers {', start)
+    if start < 0 or end < 0 or text.count(anchor) != 1:
+        raise ValueError('Unexpected Lineage generated kernel header module')
+    generator = '''lineage_generator {
+    name: "generated_kernel_includes",
+    // Native R36H UAPI headers exported by Rockchip 5.10 headers_install.
+    cmd: "cp -a device/gameconsole/r36h/kernel-headers/. $(genDir)/",
+    export_include_dirs: ["include"],
+    dep_root: "device/gameconsole/r36h/kernel-headers",
+    dep_files: ["include/**/*"],
+}
+'''
+    lineage_bp.write_text(text[:start]+generator+text[end:])
     # WSL1 rejects mmap of zero-byte files (microsoft/WSL#3451). A newline
     # is an empty Ninja program and is also harmless in the epoch marker.
     bootstrap = source/'build/soong/ui/build/soong.go'
@@ -47,5 +70,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('source', type=Path)
     parser.add_argument('support', type=Path)
+    parser.add_argument('--kernel-headers', type=Path, required=True)
     args = parser.parse_args()
-    apply(args.source.resolve(), args.support.resolve())
+    apply(args.source.resolve(), args.support.resolve(), args.kernel_headers.resolve())
