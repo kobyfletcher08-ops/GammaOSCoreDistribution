@@ -26,7 +26,7 @@ if ((available < 120 * 1024 * 1024 * 1024)); then
     exit 1
 fi
 apt-get update
-apt-get install -y --no-install-recommends git git-lfs ca-certificates curl python3 \
+apt-get install -y --no-install-recommends git git-lfs ca-certificates curl python3 python-is-python3 \
     rsync zip unzip xz-utils file build-essential bc bison flex libssl-dev libelf-dev \
     zlib1g-dev libncurses-dev libxml2-utils xsltproc g++-multilib gcc-multilib \
     lib32z1-dev fontconfig lz4 lzop squashfs-tools cpio dosfstools mtools e2fsprogs \
