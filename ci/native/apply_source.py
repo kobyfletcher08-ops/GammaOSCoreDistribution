@@ -16,6 +16,16 @@ def apply(source, support):
     # This file does not exist in the pinned GammaOS source. We own its
     # generated definition and must refresh it on cached source checkouts.
     bp.write_text(extra)
+    # WSL1 rejects mmap of zero-byte files (microsoft/WSL#3451). A newline
+    # is an empty Ninja program and is also harmless in the epoch marker.
+    bootstrap = source/'build/soong/ui/build/soong.go'
+    text = bootstrap.read_text()
+    old = 'err = ioutil.WriteFile(path, nil, 0666)'
+    new = r'err = ioutil.WriteFile(path, []byte("\n"), 0666)'
+    if text.count(old) == 1:
+        bootstrap.write_text(text.replace(old, new))
+    elif new not in text:
+        raise ValueError('Unexpected Soong bootstrap placeholder writer')
     init = source/'system/core/rootdir/init.rc'
     text = init.read_text()
     token = '    start rgp2xbox\n'

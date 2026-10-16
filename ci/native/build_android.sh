@@ -13,6 +13,7 @@ export BUILD_USERNAME=gammaos BUILD_HOSTNAME=r36h-native-runner
 cd "$source_dir"
 python3 - <<'PY'
 from pathlib import Path
+import os
 import struct
 p=Path('vendor/rockchip/common/bin/arm64/busybox')
 with p.open('rb') as f: data=f.read(64)
@@ -22,6 +23,12 @@ kernel_config = Path('/var/cache/gammaos-r36h-native/artifacts/kernel/kernel.con
 if 'CONFIG_COMPAT=y' not in kernel_config:
     raise SystemExit('The upstream ARM32 BusyBox requires native-kernel CONFIG_COMPAT=y')
 print('Verified upstream ARM32 BusyBox and kernel 32-bit execution support')
+# Repair placeholders from an earlier failed bootstrap. Keep every generated
+# rule in nonempty files. The source patch also handles a fresh output tree.
+for ninja_file in (Path(os.environ['OUT_DIR'])/'soong').glob('globs-*.ninja'):
+    if ninja_file.is_file() and ninja_file.stat().st_size == 0:
+        ninja_file.write_text('\n')
+        print('Repaired empty WSL1 Ninja placeholder:', ninja_file.name)
 PY
 # Upstream envsetup legitimately references unset shell variables.
 set +u
