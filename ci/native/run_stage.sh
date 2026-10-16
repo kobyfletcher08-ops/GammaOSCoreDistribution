@@ -12,7 +12,7 @@ flock -n 9 || { echo 'Another native job owns the build cache.'; exit 1; }
 case "$phase" in
     kernel)
         export BUILD_JOBS=${BUILD_JOBS:-16}
-        apt-get install -y --no-install-recommends python3-pyelftools flex bison bc python3-dev swig libgnutls28-dev
+        apt-get install -y --no-install-recommends python3-pyelftools flex bison bc python3-dev swig libgnutls28-dev uuid-dev
         bash "$support/port/r36h/build_kernel.sh" "$cache" "$cache/artifacts/kernel"
         cp -a "$cache/artifacts/kernel" "$stage/output/"
         bash "$support/port/r36h/build_bootloader.sh" "$cache" "$cache/artifacts/bootloader"
