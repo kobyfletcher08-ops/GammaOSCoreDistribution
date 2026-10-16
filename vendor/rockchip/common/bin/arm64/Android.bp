@@ -4,7 +4,7 @@
 cc_prebuilt_binary {
     name: "r36h_busybox",
     srcs: ["busybox"],
-    filename: "busybox",
+    stem: "busybox",
     compile_multilib: "32",
     static_executable: true,
     stl: "none",
