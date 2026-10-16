@@ -163,7 +163,9 @@ def assemble(kernel, bootloader, android, output):
     system, vendor, userdata = (android/(name+'.img') for name in ('system', 'vendor', 'userdata'))
     for path in (system, vendor, userdata):
         ext4(path)
-    for path in ('/bin/init', '/build.prop'):
+    # Android 13 build_image.py wraps system/ together with root_dir even
+    # when boot.img contains the first-stage ramdisk.
+    for path in ('/system/bin/init', '/system/build.prop'):
         require_file(system, path)
     for path in ('/etc/fstab.r36h', '/etc/init/hw/init.r36h.rc', '/etc/vintf/manifest.xml',
                  '/lib64/hw/audio.primary.r36h.so', '/lib64/hw/hwcomposer.drm.so'):
