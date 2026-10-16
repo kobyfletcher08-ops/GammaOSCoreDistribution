@@ -51,6 +51,7 @@ cat > "$source_dir/.git/info/sparse-checkout" <<'PATTERNS'
 !/out/
 !/**/darwin*/
 !/**/windows*/
+/development/host/windows/
 PATTERNS
 if ! git -C "$source_dir" cat-file -e "$source_commit^{commit}" 2>/dev/null; then
     git -C "$source_dir" -c protocol.version=2 fetch --no-tags --depth=1 --filter=blob:none origin "$source_commit"
@@ -74,6 +75,7 @@ paths = [
     'prebuilts/jdk/jdk11/linux-x86/bin/java',
     'prebuilts/clang/host/linux-x86/clang-r450784d/bin/clang',
     'device/google/atv/products/atv_generic_system.mk',
+    'development/host/windows/Android.bp',
     'vendor/rockchip/common/gpu/MaliTDVx/lib/arm64/libGLES_mali.so',
 ]
 report = {'source_commit': subprocess.check_output(['git','-C',str(root),'rev-parse','HEAD'], text=True).strip(),
