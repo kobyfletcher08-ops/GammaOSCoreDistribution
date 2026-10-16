@@ -16,8 +16,12 @@ from pathlib import Path
 import struct
 p=Path('vendor/rockchip/common/bin/arm64/busybox')
 with p.open('rb') as f: data=f.read(64)
-if data[:6] != b'\x7fELF\x02\x01' or struct.unpack_from('<H',data,18)[0]!=183:
-    raise SystemExit('Native build requires the real ARM64 BusyBox ELF')
+if len(data) != 64 or data[:6] != b'\x7fELF\x01\x01' or struct.unpack_from('<H',data,18)[0]!=40:
+    raise SystemExit('Expected the upstream static ARM32 BusyBox ELF')
+kernel_config = Path('/var/cache/gammaos-r36h-native/artifacts/kernel/kernel.config').read_text().splitlines()
+if 'CONFIG_COMPAT=y' not in kernel_config:
+    raise SystemExit('The upstream ARM32 BusyBox requires native-kernel CONFIG_COMPAT=y')
+print('Verified upstream ARM32 BusyBox and kernel 32-bit execution support')
 PY
 # Upstream envsetup legitimately references unset shell variables.
 set +u

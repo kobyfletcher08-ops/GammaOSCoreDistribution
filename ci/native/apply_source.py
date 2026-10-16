@@ -13,12 +13,9 @@ def apply(source, support):
     shutil.copytree(support/'device/gameconsole/r36h', target)
     bp = source/'vendor/rockchip/common/bin/arm64/Android.bp'
     extra = (support/'vendor/rockchip/common/bin/arm64/Android.bp').read_text()
-    if bp.exists():
-        existing = bp.read_text()
-        if 'name: "r36h_busybox"' not in existing:
-            bp.write_text(existing+'\n'+extra)
-    else:
-        bp.write_text(extra)
+    # This file does not exist in the pinned GammaOS source. We own its
+    # generated definition and must refresh it on cached source checkouts.
+    bp.write_text(extra)
     init = source/'system/core/rootdir/init.rc'
     text = init.read_text()
     token = '    start rgp2xbox\n'
