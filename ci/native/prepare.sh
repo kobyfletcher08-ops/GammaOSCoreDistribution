@@ -50,15 +50,18 @@ cat > "$source_dir/.git/info/sparse-checkout" <<'PATTERNS'
 /*
 !/.repo/
 !/out/
-!/**/darwin*/
-!/**/windows*/
-/development/host/windows/
+!/prebuilts/**/darwin*/
+!/prebuilts/**/windows*/
 PATTERNS
 if ! git -C "$source_dir" cat-file -e "$source_commit^{commit}" 2>/dev/null; then
     git -C "$source_dir" -c protocol.version=2 fetch --no-tags --depth=1 --filter=blob:none origin "$source_commit"
 fi
 git -C "$source_dir" checkout --detach "$source_commit"
+# Platform-named source directories contain licenses and build metadata used
+# on Linux too. Only omit unused host prebuilts, and update cached checkouts.
+git -C "$source_dir" sparse-checkout reapply
 [[ -f "$source_dir/build/envsetup.sh" && -f "$source_dir/build/soong/soong_ui.bash" ]]
+[[ -s "$source_dir/external/angle/util/windows/third_party/StackWalker/LICENSE" ]]
 # Never restore committed repo metadata or old build outputs. Only hydrate files
 # selected into this Linux source worktree; include/exclude prevents fetching
 # the many LFS-backed .repo packfiles tracked by this repository.
@@ -77,6 +80,7 @@ paths = [
     'prebuilts/clang/host/linux-x86/clang-r450784d/bin/clang',
     'device/google/atv/products/atv_generic_system.mk',
     'development/host/windows/Android.bp',
+    'external/angle/util/windows/third_party/StackWalker/LICENSE',
     'vendor/rockchip/common/gpu/MaliTDVx/lib/arm64/libGLES_mali.so',
 ]
 report = {'source_commit': subprocess.check_output(['git','-C',str(root),'rev-parse','HEAD'], text=True).strip(),
