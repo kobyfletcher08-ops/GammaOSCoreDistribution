@@ -4,8 +4,11 @@ set -euo pipefail
 support=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 cache=$(realpath -m -- "$1")
 output=$(realpath -m -- "$2")
-jobs=${BUILD_JOBS:-16}
+jobs=${BUILD_JOBS:-32}
 [[ "$jobs" =~ ^[1-9][0-9]?$ && "$jobs" -le 64 ]]
+cpus=$(nproc)
+if (( jobs > cpus )); then jobs=$cpus; fi
+printf 'Kernel parallel jobs: %s; available CPUs: %s\n' "$jobs" "$cpus"
 mkdir -p "$cache" "$output"
 export DEBIAN_FRONTEND=noninteractive GIT_TERMINAL_PROMPT=0
 # The versioned multilib packages can coexist with this compiler; the generic
@@ -58,3 +61,4 @@ printf '%s\n' '95a3ad83f7f90e0e672b9c99b0858b4964318667' > "$output/kernel-sourc
 aarch64-linux-gnu-gcc-12 --version | head -1 > "$output/kernel-compiler.txt"
 cp "$support/SOURCES.json" "$output/"
 (cd "$output"; sha256sum Image *.dtb kernel.config SOURCES.json > SHA256SUMS)
+

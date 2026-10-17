@@ -38,10 +38,14 @@ source build/envsetup.sh
 lunch gamma_r36h-userdebug
 product_out=$(get_build_var PRODUCT_OUT)
 [[ "$product_out" == "$OUT_DIR/target/product/r36h" ]]
-# With 32 GiB RAM, cap Android's parallel jobs while retaining 16-way kernel
-# compilation. An explicit repository variable can lower it further.
-jobs=${ANDROID_BUILD_JOBS:-8}
+# The upgraded runner has 32 cores and 128 GiB RAM. Repository variables can
+# lower parallelism; never start more compiler jobs than WSL exposes CPUs.
+jobs=${ANDROID_BUILD_JOBS:-32}
 [[ "$jobs" =~ ^[1-9][0-9]?$ && "$jobs" -le 32 ]]
+cpus=$(nproc)
+if (( jobs > cpus )); then jobs=$cpus; fi
+printf 'Android parallel jobs: %s; available CPUs: %s\n' "$jobs" "$cpus"
+free -h
 m -j"$jobs" bootimage systemimage vendorimage userdataimage
 set -u
 for name in boot.img ramdisk.img system.img vendor.img userdata.img; do
@@ -53,3 +57,4 @@ printf '%s\n' 'gamma_r36h-userdebug' > "$output/android-target.txt"
 cp "$source_dir/device/gameconsole/r36h/BoardConfig.mk" "$output/"
 cp "$source_dir/device/gameconsole/r36h/manifest.xml" "$output/vendor-manifest-source.xml"
 df -h "$cache"
+

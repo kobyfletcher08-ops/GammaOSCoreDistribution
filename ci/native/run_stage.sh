@@ -11,10 +11,13 @@ exec 9>"$cache/build.lock"
 flock -n 9 || { echo 'Another native job owns the build cache.'; exit 1; }
 case "$phase" in
     kernel)
-        export BUILD_JOBS=${BUILD_JOBS:-16}
+        export BUILD_JOBS=${BUILD_JOBS:-32}
         apt-get install -y --no-install-recommends python3-pyelftools flex bison bc python3-dev swig libgnutls28-dev uuid-dev
         bash "$support/port/r36h/build_kernel.sh" "$cache" "$cache/artifacts/kernel"
-        cp -a "$cache/artifacts/kernel" "$stage/output/"
+        # Keep case-distinct Linux headers inside an archive on Windows.
+        # For example, xt_CONNMARK.h and xt_connmark.h must both survive.
+        rsync -a --exclude='/headers/' "$cache/artifacts/kernel/" "$stage/output/kernel/"
+        tar -C "$cache/artifacts/kernel" -czf "$stage/output/kernel/native-kernel-headers.tar.gz" headers
         bash "$support/port/r36h/build_bootloader.sh" "$cache" "$cache/artifacts/bootloader"
         cp -a "$cache/artifacts/bootloader" "$stage/output/"
         ;;
@@ -29,3 +32,4 @@ case "$phase" in
         ;;
     *) echo 'Unknown native build stage' >&2; exit 2 ;;
 esac
+

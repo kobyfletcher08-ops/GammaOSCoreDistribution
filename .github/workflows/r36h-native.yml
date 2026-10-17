@@ -25,8 +25,8 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  BUILD_JOBS: ${{ vars.R36H_BUILD_JOBS || '16' }}
-  ANDROID_BUILD_JOBS: ${{ vars.R36H_ANDROID_BUILD_JOBS || '8' }}
+  BUILD_JOBS: ${{ vars.R36H_BUILD_JOBS || '32' }}
+  ANDROID_BUILD_JOBS: ${{ vars.R36H_ANDROID_BUILD_JOBS || '32' }}
 
 jobs:
   build:
@@ -120,3 +120,4 @@ jobs:
           if ($env:NATIVE_STAGE -and (Test-Path -LiteralPath $env:NATIVE_STAGE)) {
             Remove-Item -LiteralPath $env:NATIVE_STAGE -Force -Recurse
           }
+

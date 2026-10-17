@@ -3,6 +3,10 @@
 set -euo pipefail
 cache=$(realpath -- "$1")
 output=$(realpath -m -- "$2")
+jobs=${BUILD_JOBS:-32}
+[[ "$jobs" =~ ^[1-9][0-9]?$ && "$jobs" -le 64 ]]
+cpus=$(nproc)
+if (( jobs > cpus )); then jobs=$cpus; fi
 mkdir -p "$output"
 source_dir="$cache/u_boot-f919c3a889f0"
 objects="$cache/uboot-out-native"
@@ -27,9 +31,10 @@ p.write_text('\n'.join(rows)+'\n')
 PY
 make -C "$source_dir" O="$objects" CROSS_COMPILE=aarch64-linux-gnu- CC=aarch64-linux-gnu-gcc-12 olddefconfig
 make -C "$source_dir" O="$objects" CROSS_COMPILE=aarch64-linux-gnu- CC=aarch64-linux-gnu-gcc-12 \
-    BL31="$bl31" -j"${BUILD_JOBS:-16}"
+    BL31="$bl31" -j"$jobs"
 [[ -s "$objects/u-boot-rockchip.bin" ]]
 cp "$objects/u-boot-rockchip.bin" "$output/"
 cp "$objects/.config" "$output/u-boot.config"
 cp "$bl31" "$output/"
 printf '%s\n' 'f919c3a889f0ec7d63a48b5d0ed064386b0980bd' > "$output/u-boot-source-commit.txt"
+

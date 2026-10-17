@@ -14,6 +14,7 @@ mkdir -p "$cache"
 exec 9>"$cache/build.lock"
 flock -n 9 || { echo 'Another native GammaOS job owns the source cache.'; exit 1; }
 uname -a
+printf 'Linux CPUs available to the build: %s\n' "$(nproc)"
 df -h "$cache"
 free -h
 if [[ -d "$source_dir/.git" ]]; then
@@ -89,3 +90,4 @@ pathlib.Path(sys.argv[2]).write_text(json.dumps(report, indent=2)+'\n')
 print(json.dumps(report, indent=2))
 PY
 echo 'Native GammaOS source preparation complete. This job has not built a flashable image.'
+
