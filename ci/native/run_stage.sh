@@ -21,6 +21,9 @@ case "$phase" in
         bash "$support/port/r36h/build_bootloader.sh" "$cache" "$cache/artifacts/bootloader"
         cp -a "$cache/artifacts/bootloader" "$stage/output/"
         ;;
+    android-check)
+        bash "$support/ci/native/build_android.sh" "$stage/output/android" check
+        ;;
     android)
         bash "$support/ci/native/build_android.sh" "$stage/output/android"
         ;;

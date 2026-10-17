@@ -73,6 +73,15 @@ jobs:
           $driver = "/var/cache/gammaos-r36h-native/ci/$($env:GITHUB_SHA)/ci/native/run_stage.sh"
           & wsl.exe -d Ubuntu-24.04 -u root --exec env "BUILD_JOBS=$($env:BUILD_JOBS)" bash $driver $linuxStage kernel
           if ($LASTEXITCODE -ne 0) { throw 'Native kernel/bootloader build failed; see kernel.log.' }
+      - name: Validate Android product and install rules
+        if: github.event.inputs.mode != 'source'
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $linuxStage = (& wsl.exe -d Ubuntu-24.04 -u root --exec wslpath -a -u $env:NATIVE_STAGE | Out-String).Trim()
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot map the staging directory.' }
+          $driver = "/var/cache/gammaos-r36h-native/ci/$($env:GITHUB_SHA)/ci/native/run_stage.sh"
+          & wsl.exe -d Ubuntu-24.04 -u root --exec env "ANDROID_BUILD_JOBS=$($env:ANDROID_BUILD_JOBS)" bash $driver $linuxStage android-check
+          if ($LASTEXITCODE -ne 0) { throw 'Android product validation failed; see android-check.log.' }
       - name: Build GammaOS Android, vendor and first-stage ramdisk from source
         if: github.event.inputs.mode != 'source'
         run: |

@@ -5,6 +5,11 @@ support=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)
 cache=/var/cache/gammaos-r36h-native
 source_dir=$cache/android
 output=$(realpath -m -- "$1")
+mode=${2:-build}
+case "$mode" in
+    check|build) ;;
+    *) echo 'Unknown Android build mode' >&2; exit 2 ;;
+esac
 mkdir -p "$output"
 [[ -s "$cache/artifacts/kernel/Image" ]]
 python3 "$support/ci/native/apply_source.py" "$source_dir" "$support" \
@@ -46,6 +51,13 @@ cpus=$(nproc)
 if (( jobs > cpus )); then jobs=$cpus; fi
 printf 'Android parallel jobs: %s; available CPUs: %s\n' "$jobs" "$cpus"
 free -h
+if [[ "$mode" == check ]]; then
+    # Generate the complete Soong/Kati graph, including dexpreopt and install
+    # collision checks, before starting the image compilation step.
+    m -j"$jobs" nothing
+    printf '%s\n' 'Android product and install rules validated.' > "$output/android-config-check.txt"
+    exit 0
+fi
 m -j"$jobs" bootimage systemimage vendorimage userdataimage
 set -u
 for name in boot.img ramdisk.img system.img vendor.img userdata.img; do
