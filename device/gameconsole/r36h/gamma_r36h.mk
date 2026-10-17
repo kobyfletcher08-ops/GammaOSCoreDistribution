@@ -3,6 +3,9 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/core_64_bit.mk)
 $(call inherit-product, device/google/atv/products/atv_generic_system.mk)
 $(call inherit-product, device/google/atv/products/atv_system_ext.mk)
 $(call inherit-product, device/google/atv/products/atv_product.mk)
+# GammaOS loads the Lineage platform library in system_server. Install its
+# library, resources and service permissions using the source tree's config.
+include vendor/lineage/config/lineage_sdk_common.mk
 $(call inherit-product, device/gameconsole/r36h/device.mk)
 
 PRODUCT_NAME := gamma_r36h
@@ -39,3 +42,4 @@ PRODUCT_VENDOR_PROPERTIES += \
     ro.hardware.gralloc=bifrost \
     ro.opengles.version=196610 \
     vendor.gralloc.no_afbc_for_fb_target_layer=1
+
