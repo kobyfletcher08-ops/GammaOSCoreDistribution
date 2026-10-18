@@ -32,6 +32,7 @@ apt-get install -y --no-install-recommends git git-lfs ca-certificates curl pyth
     zlib1g-dev libncurses-dev libxml2-utils xsltproc g++-multilib gcc-multilib \
     lib32z1-dev fontconfig lz4 lzop squashfs-tools cpio dosfstools mtools e2fsprogs \
     gdisk device-tree-compiler u-boot-tools
+bash "$scripts/install_host_compat.sh" "$cache/host-compat"
 git lfs version
 if [[ ! -d "$source_dir/.git" ]]; then
     mkdir -p "$source_dir"
@@ -69,6 +70,7 @@ git -C "$source_dir" sparse-checkout reapply
 git -C "$source_dir" lfs install --local --skip-smudge
 timeout --signal=TERM --kill-after=30s 60m \
     python3 -u "$scripts/hydrate_lfs.py" "$source_dir" "$stage/output/lfs-report.json"
+bash "$scripts/check_renderscript.sh" "$source_dir" "$stage/output/renderscript-tools.txt"
 git -C "$source_dir" rev-parse HEAD > "$stage/output/gammaos-source-commit.txt"
 du -sh "$source_dir" "$source_dir/.git"
 df -h "$cache"
