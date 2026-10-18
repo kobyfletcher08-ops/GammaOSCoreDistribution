@@ -55,3 +55,8 @@ BOARD_HAVE_BLUETOOTH := false
 BOARD_WLAN_DEVICE :=
 WIFI_DRIVER_MODULE_PATH :=
 BOARD_SEPOLICY_DIRS += device/gameconsole/r36h/sepolicy
+
+# GammaOS platform modules consume Lineage's board-to-Soong defaults, including
+# the bootloader-message offset required by libbootloader_message.
+include vendor/lineage/config/BoardConfigSoong.mk
+
